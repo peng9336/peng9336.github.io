@@ -10,10 +10,18 @@ textarea,input{width:100%;background:#1a1b1f;border:1px solid #333;color:#eee;pa
 button{background:#00ccff;border:none;padding:10px 20px;border-radius:4px;margin:5px;cursor:pointer;color:#000;font-weight:bold;}
 .item{background:#1a1b1f;padding:15px;margin:10px 0;border-radius:8px;}
 .copy-btn{background:#222;color:#fff;border:1px solid #555}
+.lock-box{max-width:400px;margin:100px auto;text-align:center;}
 </style>
 </head>
 <body>
-<div class="box">
+
+<div id="lockScreen" class="lock-box">
+  <h2>🔐 管理后台需要密码</h2>
+  <input id="pwd" type="password" placeholder="输入管理密码">
+  <button onclick="checkPwd()">进入后台</button>
+</div>
+
+<div id="mainBox" class="box" style="display:none;">
     <h2>📝 在线文章管理</h2>
     <input id="title" placeholder="输入文章标题">
     <textarea id="content" rows="8" placeholder="内容直接写，分段自动换行"></textarea>
@@ -24,15 +32,31 @@ button{background:#00ccff;border:none;padding:10px 20px;border-radius:4px;margin
 </div>
 
 <script>
+// 管理密码 你后期可以自己改
+const adminPwd = "123456";
+
+function checkPwd(){
+  let p = document.getElementById("pwd").value;
+  if(p === adminPwd){
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("mainBox").style.display = "block";
+    initData();
+  }else{
+    alert("密码错误");
+  }
+}
+
 let artList = [];
 let siteUrl = location.origin + "/";
 
+function initData(){
 fetch("articles.json")
 .then(res=>res.json())
 .then(data=>{
     artList = data;
     renderList();
 })
+}
 
 function renderList(){
     let html = "";
