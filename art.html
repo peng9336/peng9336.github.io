@@ -3,30 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 关键：微信/QQ 卡片分享 标题+简介预览 -->
-<meta name="description" content="个人随笔 | 认知成长 | 生活感悟">
 <meta property="og:title" content="">
-<meta property="og:description" content="静下心，好好生活，慢慢沉淀">
-<meta property="og:type" content="article">
+<meta property="og:description" content="">
 <title>文章详情</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
   body{background:#121315;color:#e0e0e0}
-  nav{position:fixed;top:0;width:100%;background:#1a1b1f;padding:18px 0;box-shadow:0 4px 10px rgba(0,0,0,.3);z-index:99}
+  nav{position:fixed;top:0;width:100%;background:#1a1b1f;padding:18px 0;}
   .nav-wrap{width:90%;max-width:800px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
   .logo{font-size:20px;font-weight:bold;color:#00ccff}
   .back{color:#ccc;text-decoration:none}
-  .container{width:90%;max-width:800px;margin:0 auto;padding:100px 20px 60px}
-  .title{font-size:26px;color:#fff;margin-bottom:30px;border-left:4px solid #00ccff;padding-left:15px}
-  .content{font-size:16px;line-height:2;color:#e0e0e0}
-  footer{text-align:center;padding:30px 0;color:#666}
+  .container{width:90%;max-width:800px;margin:0 auto;padding:100px 20px}
+  .title{font-size:26px;color:#fff;margin-bottom:30px}
+  .content{line-height:2;font-size:16px;color:#ccc}
 </style>
 </head>
 <body>
 <nav>
   <div class="nav-wrap">
     <div class="logo">鹏</div>
-    <a class="back" href="index.html">← 返回首页</a>
+    <a class="back" href="index.html">← 返回</a>
   </div>
 </nav>
 
@@ -35,28 +31,15 @@
   <div class="content" id="artContent"></div>
 </div>
 
-<footer>© 2026 鹏</footer>
-
 <script>
-const url = new URL(location.href);
-const id = parseInt(url.searchParams.get("id")) || 0;
-
-fetch("articles.json")
-.then(res=>res.json())
-.then(list=>{
-  if(list[id]){
-    let title = list[id].title;
-    let desc = list[id].content.replace(/<br>/g,"").substring(0,40);
-    // 动态修改分享标题和简介
-    document.title = title + " | 鹏的随笔";
-    document.querySelector('meta[property="og:title"]').content = title;
-    document.querySelector('meta[property="og:description"]').content = desc;
-
-    document.getElementById("artTitle").innerText = title;
-    document.getElementById("artContent").innerHTML = list[id].content;
-  }else{
-    document.body.innerHTML = "<div style='color:#fff;text-align:center;padding-top:100px'>文章不存在</div>";
-  }
+const id = new URL(location.href).searchParams.get("id") || 0;
+fetch("articles.json").then(res=>res.json()).then(arr=>{
+  let data = arr[id];
+  document.title = data.title;
+  document.querySelector('meta[property="og:title"]').content = data.title;
+  document.querySelector('meta[property="og:description"]').content = data.content.replace(/<br>/g,"");
+  document.getElementById("artTitle").innerText = data.title;
+  document.getElementById("artContent").innerHTML = data.content;
 })
 </script>
 </body>
