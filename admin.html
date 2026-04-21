@@ -2,108 +2,83 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>文章管理器</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理</title>
 <style>
-body{background:#121315;color:#eee;padding:20px;}
-.box{max-width:800px;margin:0 auto;}
-textarea,input{width:100%;background:#1a1b1f;border:1px solid #333;color:#eee;padding:10px;margin:8px 0;border-radius:6px;}
-button{background:#00ccff;border:none;padding:10px 20px;border-radius:4px;margin:5px;cursor:pointer;color:#000;font-weight:bold;}
-.item{background:#1a1b1f;padding:15px;margin:10px 0;border-radius:8px;}
-.copy-btn{background:#222;color:#fff;border:1px solid #555}
-.lock-box{max-width:400px;margin:100px auto;text-align:center;}
+body{background:#121315;color:#fff;padding:20px;}
+input,textarea{width:100%;background:#1a1b1f;border:1px solid #333;color:#fff;padding:10px;margin:8px 0;}
+button{padding:8px 15px;margin:3px;cursor:pointer;}
+.lock{text-align:center;margin-top:100px;}
 </style>
 </head>
 <body>
 
-<div id="lockScreen" class="lock-box">
-  <h2>🔐 管理后台需要密码</h2>
-  <input id="pwd" type="password" placeholder="输入管理密码">
-  <button onclick="checkPwd()">进入后台</button>
+<div class="lock" id="lock">
+  <h2>后台需密码</h2>
+  <input type="password" id="pwd" placeholder="输入密码">
+  <button onclick="login()">进入</button>
 </div>
 
-<div id="mainBox" class="box" style="display:none;">
-    <h2>📝 在线文章管理</h2>
-    <input id="title" placeholder="输入文章标题">
-    <textarea id="content" rows="8" placeholder="内容直接写，分段自动换行"></textarea>
-    <button onclick="addArticle()">新增文章</button>
-    <button onclick="downloadJson()">下载保存文件</button>
-    <hr style="margin:20px 0;border-color:#333">
-    <div id="list"></div>
+<div id="box" style="display:none;">
+  <h3>新增文章</h3>
+  <input id="t" placeholder="文章标题">
+  <textarea id="c" rows="6" placeholder="文章内容"></textarea>
+  <button onclick="add()">添加</button>
+  <button onclick="save()">下载保存文件</button>
+  <div id="list"></div>
 </div>
 
 <script>
-// 管理密码 你后期可以自己改
-const adminPwd = "123456";
+const pwdCode = "123456";
+let list = [];
 
-function checkPwd(){
-  let p = document.getElementById("pwd").value;
-  if(p === adminPwd){
-    document.getElementById("lockScreen").style.display = "none";
-    document.getElementById("mainBox").style.display = "block";
-    initData();
+function login(){
+  if(document.getElementById("pwd").value === pwdCode){
+    document.getElementById("lock").style.display="none";
+    document.getElementById("box").style.display="block";
+    loadData();
   }else{
     alert("密码错误");
   }
 }
 
-let artList = [];
-let siteUrl = location.origin + "/";
-
-function initData(){
+function loadData(){
 fetch("articles.json")
 .then(res=>res.json())
-.then(data=>{
-    artList = data;
-    renderList();
+.then(arr=>{
+  list = arr;
+  showList();
 })
 }
 
-function renderList(){
-    let html = "";
-    artList.forEach((item,i)=>{
-        let link = siteUrl + "art.html?id="+i;
-        html += `
-        <div class="item">
-            <h4>${item.title}</h4>
-            <p style="font-size:12px;color:#999;">${link}</p>
-            <button class="copy-btn" onclick="copyLink('${link}')">复制分享链接</button>
-            <button onclick="del(${i})">删除</button>
-        </div>
-        `
-    })
-    document.getElementById("list").innerHTML = html;
+function showList(){
+  let html = "";
+  list.forEach((item,i)=>{
+    html += `<div style="background:#1a1b1f;padding:10px;margin:10px 0;">
+      ${item.title}
+      <br>
+      <button onclick="del(${i})">删除</button>
+      <button onclick="copy('${location.origin}/art.html?id=${i}')">复制分享链接</button>
+    </div>`
+  })
+  document.getElementById("list").innerHTML = html;
 }
 
-function addArticle(){
-    let t = document.getElementById("title").value.trim();
-    let c = document.getElementById("content").value.replaceAll("\n","<br>");
-    if(!t||!c)return alert("标题和内容不能为空");
-    artList.unshift({title:t,content:c});
-    renderList();
-    alert("添加成功！点【下载保存文件】更新");
-    document.getElementById("title").value = "";
-    document.getElementById("content").value = "";
+function add(){
+  let t = document.getElementById("t").value;
+  let c = document.getElementById("c").value.replaceAll("\n","<br>");
+  list.unshift({title:t,content:c});
+  showList();
+  alert("添加好了，记得点下载保存");
 }
-
-function del(i){
-    if(confirm("确定删除这篇文章？")){
-        artList.splice(i,1);
-        renderList();
-    }
-}
-
-function copyLink(txt){
-    navigator.clipboard.writeText(txt);
-    alert("链接已复制，直接发朋友圈即可");
-}
-
-function downloadJson(){
-    let str = JSON.stringify(artList,null,2);
-    let blob = new Blob([str],{type:"application/json"});
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "articles.json";
-    a.click();
+function del(i){list.splice(i,1);showList();}
+function copy(url){navigator.clipboard.writeText(url);alert("链接已复制，分享出去就是标题卡片")}
+function save(){
+  let blob = new Blob([JSON.stringify(list,null,2)]);
+  let a = document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="articles.json";
+  a.click();
 }
 </script>
 </body>
