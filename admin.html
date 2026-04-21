@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>文章管理器</title>
+<style>
+body{background:#121315;color:#eee;padding:20px;}
+.box{max-width:800px;margin:0 auto;}
+textarea,input{width:100%;background:#1a1b1f;border:1px solid #333;color:#eee;padding:10px;margin:8px 0;border-radius:6px;}
+button{background:#00ccff;border:none;padding:10px 20px;border-radius:4px;margin:5px;cursor:pointer;color:#000;font-weight:bold;}
+.item{background:#1a1b1f;padding:15px;margin:10px 0;border-radius:8px;}
+.copy-btn{background:#222;color:#fff;border:1px solid #555}
+</style>
+</head>
+<body>
+<div class="box">
+    <h2>📝 在线文章管理</h2>
+    <input id="title" placeholder="输入文章标题">
+    <textarea id="content" rows="8" placeholder="内容直接写，分段自动换行"></textarea>
+    <button onclick="addArticle()">新增文章</button>
+    <button onclick="downloadJson()">下载保存文件</button>
+    <hr style="margin:20px 0;border-color:#333">
+    <div id="list"></div>
+</div>
+
+<script>
+let artList = [];
+let siteUrl = location.origin + "/";
+
+fetch("articles.json")
+.then(res=>res.json())
+.then(data=>{
+    artList = data;
+    renderList();
+})
+
+function renderList(){
+    let html = "";
+    artList.forEach((item,i)=>{
+        let link = siteUrl + "art.html?id="+i;
+        html += `
+        <div class="item">
+            <h4>${item.title}</h4>
+            <p style="font-size:12px;color:#999;">${link}</p>
+            <button class="copy-btn" onclick="copyLink('${link}')">复制分享链接</button>
+            <button onclick="del(${i})">删除</button>
+        </div>
+        `
+    })
+    document.getElementById("list").innerHTML = html;
+}
+
+function addArticle(){
+    let t = document.getElementById("title").value.trim();
+    let c = document.getElementById("content").value.replaceAll("\n","<br>");
+    if(!t||!c)return alert("标题和内容不能为空");
+    artList.unshift({title:t,content:c});
+    renderList();
+    alert("添加成功！点【下载保存文件】更新");
+    document.getElementById("title").value = "";
+    document.getElementById("content").value = "";
+}
+
+function del(i){
+    if(confirm("确定删除这篇文章？")){
+        artList.splice(i,1);
+        renderList();
+    }
+}
+
+function copyLink(txt){
+    navigator.clipboard.writeText(txt);
+    alert("链接已复制，直接发朋友圈即可");
+}
+
+function downloadJson(){
+    let str = JSON.stringify(artList,null,2);
+    let blob = new Blob([str],{type:"application/json"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "articles.json";
+    a.click();
+}
+</script>
+</body>
+</html>
