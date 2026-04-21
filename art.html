@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="个人随笔 | 认知成长 | 现实感悟">
+<!-- 关键：微信/QQ 卡片分享 标题+简介预览 -->
+<meta name="description" content="个人随笔 | 认知成长 | 生活感悟">
+<meta property="og:title" content="">
+<meta property="og:description" content="静下心，好好生活，慢慢沉淀">
+<meta property="og:type" content="article">
 <title>文章详情</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
@@ -41,8 +45,14 @@ fetch("articles.json")
 .then(res=>res.json())
 .then(list=>{
   if(list[id]){
-    document.title = list[id].title + " | 鹏的随笔";
-    document.getElementById("artTitle").innerText = list[id].title;
+    let title = list[id].title;
+    let desc = list[id].content.replace(/<br>/g,"").substring(0,40);
+    // 动态修改分享标题和简介
+    document.title = title + " | 鹏的随笔";
+    document.querySelector('meta[property="og:title"]').content = title;
+    document.querySelector('meta[property="og:description"]').content = desc;
+
+    document.getElementById("artTitle").innerText = title;
     document.getElementById("artContent").innerHTML = list[id].content;
   }else{
     document.body.innerHTML = "<div style='color:#fff;text-align:center;padding-top:100px'>文章不存在</div>";
